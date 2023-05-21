@@ -1,8 +1,0 @@
-C:\Users\coope\Documents\GitHub\Replenisher\bin\Debug\ServerPlugins\Replenisher.dll
-C:\Users\coope\Documents\GitHub\Replenisher\bin\Debug\ServerPlugins\Replenisher.pdb
-C:\Users\coope\Documents\GitHub\Replenisher\bin\Debug\ServerPlugins\Newtonsoft.Json.dll
-C:\Users\coope\Documents\GitHub\Replenisher\bin\Debug\ServerPlugins\TerrariaServer.exe
-C:\Users\coope\Documents\GitHub\Replenisher\bin\Debug\ServerPlugins\TShockAPI.dll
-C:\Users\coope\Documents\GitHub\Replenisher\obj\Debug\Replenisher.csprojResolveAssemblyReference.cache
-C:\Users\coope\Documents\GitHub\Replenisher\obj\Debug\Replenisher.dll
-C:\Users\coope\Documents\GitHub\Replenisher\obj\Debug\Replenisher.pdb
