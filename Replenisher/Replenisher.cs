@@ -10,24 +10,17 @@ using TShockAPI;
 namespace Replenisher {
     [ApiVersion(2, 1)]
     public class Replenisher : TerrariaPlugin {
-        private static readonly int TIMEOUT = 4000;
+        public override Version Version => new Version("1.2.0");
+        public override string Name => "Replenisher";
+        public override string Author => "omni";
+        public override string Description => "Replenish your world's resources!";
+
+        private static readonly int TIMEOUT = 10000;
 
         private Config config;
 
         private DateTime lastTime = DateTime.UtcNow;
-
-        public override Version Version {
-            get { return new Version("1.1.5"); }
-        }
-        public override string Name {
-            get { return "Replenisher"; }
-        }
-        public override string Author {
-            get { return "omni"; }
-        }
-        public override string Description {
-            get { return "Replenish your world's resources!"; }
-        }
+        
         public Replenisher(Main game) : base(game) {
         }
 
@@ -39,7 +32,6 @@ namespace Replenisher {
             if (!ReadConfig())
                 TShock.Log.ConsoleError("Error in config file. This will probably cause the plugin to crash if not resolved.");
         }
-
         private void OnUpdate(EventArgs e) {
             if (DateTime.UtcNow.Minute - lastTime.Minute < config.AutoRefillTimerInMinutes) {
                 return;
@@ -79,6 +71,7 @@ namespace Replenisher {
             }
 
         }
+
         private void CreateConfig() {
             string filepath = Path.Combine(TShock.SavePath, "ReplenisherConfig.json");
             try {
@@ -134,110 +127,7 @@ namespace Replenisher {
             return;
         }
 
-        
-        private bool PrivateReplenisher(GenType type, int amount, out int gend, ushort oretype = 0, CommandArgs args = null) {
-            int counter = gend = 0;
-            bool success;
-            for (int i = 0; i < TIMEOUT; i++) {
-                success = false;
-                int xRandBase = WorldGen.genRand.Next(1, Main.maxTilesX);
-                int y = 0;
-                switch (type) {
-                    case GenType.ore:
-                        y = WorldGen.genRand.Next((int)(Main.worldSurface) - 12, Main.maxTilesY);
-                        if (TShock.Regions.InAreaRegion(xRandBase, y).Any() && !config.GenerateInProtectedAreas) {
-                            success = false;
-                            break;
-                        }
-                        if (oretype != Terraria.ID.TileID.Hellstone)
-                            WorldGen.OreRunner(xRandBase, y, 2.0, amount, oretype);
-                        else
-                            WorldGen.OreRunner(xRandBase, WorldGen.genRand.Next((int)(Main.maxTilesY) - 200, Main.maxTilesY), 2.0, amount, oretype);
-                        success = true;
-                        break;
-                    case GenType.chests:
-                        if (amount == 0) {
-                            int tmpEmpty = 0, empty = 0;
-                            for (int x = 0; x < 1000; x++) {
-                                if (Main.chest[x] != null) {
-                                    tmpEmpty++;
-                                    bool found = false;
-                                    foreach (Item itm in Main.chest[x].item)
-                                        if (itm.netID != 0)
-                                            found = true;
-                                    if (found == false) {
-                                        empty++;
-                                        WorldGen.KillTile(Main.chest[x].x, Main.chest[x].y, false, false, false);
-                                        Main.chest[x] = null;
-
-                                    }
-
-                                }
-
-                            }
-                            args.Player.SendSuccessMessage("Uprooted {0} empty out of {1} chests.", empty, tmpEmpty);
-                            return true;
-                        }
-                        y = WorldGen.genRand.Next((int)((Main.worldSurface)*0.8), Main.maxTilesY);
-                        if (TShock.Regions.InAreaRegion(xRandBase, y).Any() && !config.GenerateInProtectedAreas) {
-                            success = false;
-                            break;
-                        }
-                        success = WorldGen.AddBuriedChest(xRandBase, y);
-                        break;
-                    case GenType.pots:
-                        y = WorldGen.genRand.Next((int)(Main.worldSurface) - 12, Main.maxTilesY);
-                        if (TShock.Regions.InAreaRegion(xRandBase, y).Any() && !config.GenerateInProtectedAreas) {
-                            success = false;
-                            break;
-                        }
-                        success = WorldGen.PlacePot(xRandBase, y);
-                        break;
-                    case GenType.lifecrystals:
-                        y = WorldGen.genRand.Next((int)(Main.worldSurface) - 12, Main.maxTilesY);
-                        if (TShock.Regions.InAreaRegion(xRandBase, y).Any() && !config.GenerateInProtectedAreas) {
-                            success = false;
-                            break;
-                        }
-                        success = WorldGen.AddLifeCrystal(xRandBase, y);
-                        break;
-                    case GenType.altars:
-                        y = WorldGen.genRand.Next((int)(Main.worldSurface) - 12, Main.maxTilesY);
-                        if (TShock.Regions.InAreaRegion(xRandBase, y).Any() && !config.GenerateInProtectedAreas) {
-                            success = false;
-                            break;
-                        }
-                        WorldGen.Place3x2(xRandBase, y, 26);
-                        success = Main.tile[xRandBase, y].type == 26;
-                        break;
-                    case GenType.trees:
-                        WorldGen.AddTrees();
-                        success = true;
-                        break;
-                    case GenType.floatingisland:
-                        y = WorldGen.genRand.Next((int)(Main.worldSurface*0.20), (int)(Main.worldSurface*0.35));
-                        if (TShock.Regions.InAreaRegion(xRandBase, y).Any() && !config.GenerateInProtectedAreas) {
-                            success = false;
-                            break;
-                        }
-                        WorldGen.FloatingIsland(xRandBase, y);
-                        success = true;
-                        break;
-                    case GenType.pyramids:
-                        //TODO
-                        break;
-                }
-                if (success) {
-                    counter++;
-                    gend = counter;
-                    if (counter >= amount)
-                        return true;
-                }
-            }
-            return false;
-        } 
-
-        private bool PrivateReplenisher(GenType type, int amount, ushort oretype = 0, CommandArgs args = null) {
+        private int PrivateReplenisher(GenType type, int amount, ushort oretype = 0, CommandArgs args = null) {
             int counter = 0;
             bool success;
             for (int i = 0; i < TIMEOUT; i++) {
@@ -251,14 +141,16 @@ namespace Replenisher {
                             success = false;
                             break;
                         }
-                        if (oretype != Terraria.ID.TileID.Hellstone)
-                            WorldGen.OreRunner(xRandBase, y, 2.0, amount, oretype);
-                        else
+                        if (oretype == Terraria.ID.TileID.Hellstone) {
                             WorldGen.OreRunner(xRandBase, WorldGen.genRand.Next((int)(Main.maxTilesY) - 200, Main.maxTilesY), 2.0, amount, oretype);
+                        }
+                        else {
+                            WorldGen.OreRunner(xRandBase, y, 2.0, amount, oretype);
+                        } 
                         success = true;
                         break;
                     case GenType.chests:
-                        if (amount == 0) {
+                        if (amount == 0) {    // uproot chests
                             int tmpEmpty = 0, empty = 0;
                             for (int x = 0; x < 1000; x++) {
                                 if (Main.chest[x] != null) {
@@ -279,14 +171,17 @@ namespace Replenisher {
                                 }
                             }
                             args.Player.SendSuccessMessage("Uprooted {0} empty out of {1} chests.", empty, tmpEmpty);
-                            return true;
+                            return counter;
                         }
-                        y = WorldGen.genRand.Next((int)(Main.worldSurface) - 200, Main.maxTilesY);
+                        y = WorldGen.genRand.Next((int)((Main.worldSurface)*0.90), Main.maxTilesY);
                         if (TShock.Regions.InAreaRegion(xRandBase, y).Any() && !config.GenerateInProtectedAreas) {
                             success = false;
                             break;
                         }
-                        success = WorldGen.AddBuriedChest(xRandBase, y);
+
+                        try { success = WorldGen.AddBuriedChest(xRandBase, y); }
+                        catch (Exception){ success = false; }
+
                         break;
                     case GenType.pots:
                         y = WorldGen.genRand.Next((int)(Main.worldSurface) - 12, Main.maxTilesY);
@@ -318,7 +213,7 @@ namespace Replenisher {
                         success = true;
                         break;
                     case GenType.floatingisland:
-                        y = WorldGen.genRand.Next((int)Main.worldSurface + 175, (int)Main.worldSurface + 300);
+                        y = WorldGen.genRand.Next((int)(Main.worldSurface*0.22), (int)(Main.worldSurface*0.35));
                         if (TShock.Regions.InAreaRegion(xRandBase, y).Any() && !config.GenerateInProtectedAreas) {
                             success = false;
                             break;
@@ -327,18 +222,22 @@ namespace Replenisher {
                         success = true;
                         break;
                     case GenType.pyramids:
-                        //TODO
+                        y = WorldGen.genRand.Next((int)(Main.worldSurface * 0.9), (int)(Main.worldSurface * 1.2));
+                        if (Main.tile[xRandBase, y].type != 53 || xRandBase > Main.maxTilesX - WorldGen.oceanDistance || xRandBase < WorldGen.oceanDistance ) {
+                            success = false;
+                            break;
+                        } 
+                        success = WorldGen.Pyramid(xRandBase, y);
                         break;
                 }
                 if (success) {
                     counter++;
                     if (counter >= amount)
-                        return true;
+                        return counter;
                 }
             }
-            return false;
+            return counter;
         }
-
         public void Replen(CommandArgs args) {
             GenType type = GenType.ore;
             int amount = -1;
@@ -359,14 +258,14 @@ namespace Replenisher {
                     if (args.Parameters.Count >= 3)
                         args.Player.SendInfoMessage("CAUTION: The number entered is not the number of trees total. It refers to the number of batches of trees to generate.");
                 }
-                if (PrivateReplenisher(type, amount, out counter, oretype, args)) {
+                if ((counter = PrivateReplenisher(type, amount, oretype, args)) == amount) {
                     args.Player.SendInfoMessage(type.ToString().FirstCharToUpper() + " generated successfully.");
                     return;
                 }
-                args.Player.SendErrorMessage("Failed to generate all the " + type.ToString() + ". Generated " + counter + " " + type.ToString() + ".");
+                args.Player.SendErrorMessage($"Failed to generate all the {type}. Generated {counter} {type}.");
             }
             else
-                args.Player.SendErrorMessage("Incorrect usage. Correct usage: /replen <ore|chests|pots|lifecrystals|altars|trees|floatingisland> <amount> (oretype)\r\nNote: when generating trees, the amount is in batches not specific trees.");
+                args.Player.SendErrorMessage("Incorrect usage. Correct usage: /replen <ore|chests|pots|lifecrystals|altars|trees|floatingisland|pyramids> <amount> (oretype)\r\nNote: when generating trees, the amount is in batches not specific trees.");
         }
     }
     public enum GenType {
