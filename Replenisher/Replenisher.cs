@@ -10,7 +10,7 @@ using TShockAPI;
 namespace Replenisher {
     [ApiVersion(2, 1)]
     public class Replenisher : TerrariaPlugin {
-        public override Version Version => new Version("1.2.0");
+        public override Version Version => new Version("1.2.1");
         public override string Name => "Replenisher";
         public override string Author => "omni";
         public override string Description => "Replenish your world's resources!";
@@ -33,7 +33,7 @@ namespace Replenisher {
                 TShock.Log.ConsoleError("Error in config file. This will probably cause the plugin to crash if not resolved.");
         }
         private void OnUpdate(EventArgs e) {
-            if (DateTime.UtcNow.Minute - lastTime.Minute < config.AutoRefillTimerInMinutes) {
+            if ((DateTime.UtcNow - lastTime).TotalMinutes < config.AutoRefillTimerInMinutes) {
                 return;
             }
 
@@ -152,7 +152,7 @@ namespace Replenisher {
                     case GenType.chests:
                         if (amount == 0) {    // uproot chests
                             int tmpEmpty = 0, empty = 0;
-                            for (int x = 0; x < 1000; x++) {
+                            for (int x = 0; x < Main.maxChests; x++) {
                                 if (Main.chest[x] != null) {
                                     tmpEmpty++;
                                     bool found = false;
