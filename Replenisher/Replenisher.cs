@@ -10,7 +10,7 @@ using TShockAPI;
 namespace Replenisher {
     [ApiVersion(2, 1)]
     public class Replenisher : TerrariaPlugin {
-        public override Version Version => new Version("1.2.1");
+        public override Version Version => new Version(1, 2, 2);
         public override string Name => "Replenisher";
         public override string Author => "omni";
         public override string Description => "Replenish your world's resources!";
@@ -142,10 +142,10 @@ namespace Replenisher {
                             break;
                         }
                         if (oretype == Terraria.ID.TileID.Hellstone) {
-                            WorldGen.OreRunner(xRandBase, WorldGen.genRand.Next((int)(Main.maxTilesY) - 200, Main.maxTilesY), 2.0, amount, oretype);
+                            WorldGen.OreRunner(xRandBase, WorldGen.genRand.Next((int)(Main.maxTilesY) - 200, Main.maxTilesY), WorldGen.genRand.Next(3, 8), amount, oretype);
                         }
                         else {
-                            WorldGen.OreRunner(xRandBase, y, 2.0, amount, oretype);
+                            WorldGen.OreRunner(xRandBase, y, WorldGen.genRand.Next(3, 8), amount, oretype);
                         } 
                         success = true;
                         break;
