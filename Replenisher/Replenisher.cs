@@ -12,7 +12,7 @@ namespace Replenisher
     [ApiVersion(2, 1)]
     public class Replenisher : TerrariaPlugin
     {
-        public override Version Version => new Version(1, 2, 3);
+        public override Version Version => new Version(1, 2, 4);
         public override string Name => "Replenisher";
         public override string Author => "omni & Soofa";
         public override string Description => "Replenish your world's resources!";
@@ -302,7 +302,7 @@ namespace Replenisher
                     }
                     var obj = new Terraria.ID.TileID();
                     try { oretype = (ushort)obj.GetType().GetField(args.Parameters[2].FirstCharToUpper()).GetValue(obj); }
-                    catch (ArgumentException) { args.Player.SendErrorMessage("Please enter a valid ore type."); }
+                    catch { args.Player.SendErrorMessage("Please enter a valid ore type."); }
                 }
                 else if (type == GenType.trees)
                 {
